@@ -14,4 +14,4 @@
 Note that all these queries return with "Access-Control-Allow-Origin: *" so that cross domain access is allowed.
 
 ## Source Code
-* https://github.com/victorhsieh/twlaw/tree/master/www
+* https://github.com/victorhsieh/mongo-serve

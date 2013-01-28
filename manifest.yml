@@ -2,8 +2,8 @@
 applications: 
 - framework: node
   runtime: node08
-  url: twlaw.${target-base}
+  url: twdata.${target-base}
   instances: 1
-  name: twlaw
+  name: twdata
   path: .
   memory: 64M
