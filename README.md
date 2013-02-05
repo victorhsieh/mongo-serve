@@ -25,4 +25,4 @@ Company
 * mongoimport --drop -h ds049347.mongolab.com:49347 -d company -c profile --upsert --upsertFields id -u admin -p r0nny company.json
 
 Law progress
-* mongoimport --drop -h ds043467.mongolab.com:43467 -d law-progress -c progress --upsert --upsertfields id -u admin -p $PASSWD progress.json
+* mongoimport --drop -h ds043467.mongolab.com:43467 -d law-progress -c law-progress --upsert --upsertfields id -u admin -p $PASSWD progress.json
