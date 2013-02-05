@@ -10,8 +10,12 @@ mongodb_config =
         url: \mongodb://g0v:readonly@ds049347.mongolab.com:49347/company
         list_fields: {+統一編號, +公司名稱, -_id}
         query_id_field: \公司名稱
+    'law-progress':
+        url: \mongodb://g0v:readonly@ds043467.mongolab.com:43467/law-progress
+        list_fields: {+proposal_name, +id, +status, -_id}
+        query_id_field: \id
 
-list_doc = (type, param, cb) ->
+list_doc = (type, field, param, cb) ->
     unless type? and mongodb_config[type]?
         cb!
         return
@@ -23,7 +27,7 @@ list_doc = (type, param, cb) ->
     options = fields: config.list_fields, skip: 0, limit: 10
     options <<< param
     # TODO filter
-    err, docs <- coll.find({}, options).toArray
+    err, docs <- coll.find(field, options).toArray
     cb docs
 
 query_doc = (type, name, param, cb) ->
@@ -49,12 +53,18 @@ renderJson = (res, obj) ->
         'Access-Control-Allow-Origin': '*'
     res.end JSON.stringify obj
 
+app.get '/:type/by/:field/:value', (req, res) ->
+    fields = {}
+    fields[req.params.field] = decodeURIComponent req.params.value
+    list_doc req.params.type, fields, req.query, (doc) ->
+        renderJson res, doc
+
 app.get '/:type/:name', (req, res) ->
     query_doc req.params.type, decodeURIComponent(req.params.name), req.query, (doc) ->
         renderJson res, doc
 
 app.get '/:type', (req, res) ->
-    list_doc req.params.type, req.query, (docs) ->
+    list_doc req.params.type, {}, req.query, (docs) ->
         renderJson res, docs ? {error: 'not found'}
 
 app.get '/', (req, res) ->
