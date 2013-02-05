@@ -12,8 +12,8 @@ mongodb_config =
         query_id_field: \公司名稱
     'law-progress':
         url: \mongodb://g0v:readonly@ds043467.mongolab.com:43467/law-progress
-        list_fields: {+proposal_name, +id, +status, -_id}
-        query_id_field: \id
+        list_fields: {+proposal_name, +proposal_id, +status, -_id}
+        query_id_field: \proposal_id
 
 list_doc = (type, field, param, cb) ->
     unless type? and mongodb_config[type]?
