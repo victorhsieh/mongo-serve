@@ -21,4 +21,7 @@ Supported data sets: law, law-progress, company
 Note that all these queries return with "Access-Control-Allow-Origin: *" so that cross domain access is allowed.
 
 ## Source Code
+
 * https://github.com/victorhsieh/mongo-serve
+
+Feel free to connect to mongodb directly (mongo uri is in [app.ls](https://github.com/victorhsieh/mongo-serve/blob/master/app.ls#L6)), or copy.  Availability of the service is not guaranteed for now.
