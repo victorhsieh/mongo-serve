@@ -12,10 +12,10 @@ mongodb_config =
         query_id_field: \公司名稱
     'law-progress':
         url: \mongodb://g0v:readonly@ds043467.mongolab.com:43467/law-progress
-        list_fields: {+proposal_name, +proposal_id, +status, -_id}
+        list_fields: {+proposal_name, +proposal_id, +status, -_id, +progress}
         query_id_field: \proposal_id
 
-list_doc = (type, field, param, cb) ->
+list_doc = (type, {q={}, f={}, sk=0, l=100}, cb) ->
     unless type? and mongodb_config[type]?
         cb!
         return
@@ -24,10 +24,9 @@ list_doc = (type, field, param, cb) ->
     err, db <- mongodb.Db.connect config.url
     err, coll <- db.collection type
 
-    options = fields: config.list_fields, skip: 0, limit: 10
-    options <<< param
-    # TODO filter
-    err, docs <- coll.find(field, options).toArray
+    options = fields: config.list_fields, sk: sk, limit: l
+    options.fields <<<< f if f
+    err, docs <- coll.find(q, options).toArray
     cb docs
 
 query_doc = (type, name, param, cb) ->
@@ -53,10 +52,20 @@ renderJson = (res, obj) ->
         'Access-Control-Allow-Origin': '*'
     res.end JSON.stringify obj
 
+parse_param = (req, param) ->
+    try
+        return JSON.parse req.query[param]
+    catch
+        return void
+
+app.get '/favicon.ico', (req, res) ->
+    res.writeHead 404
+    res.end "Not found"
+
 app.get '/:type/by/:field/:value', (req, res) ->
     fields = {}
     fields[req.params.field] = decodeURIComponent req.params.value
-    list_doc req.params.type, fields, req.query, (doc) ->
+    list_doc req.params.type, {f: fields, q: req.query}, (doc) ->
         renderJson res, doc
 
 app.get '/:type/:name', (req, res) ->
@@ -64,7 +73,13 @@ app.get '/:type/:name', (req, res) ->
         renderJson res, doc
 
 app.get '/:type', (req, res) ->
-    list_doc req.params.type, {}, req.query, (docs) ->
+    find_param = {
+        q: parse_param(req, 'q') ? {}
+        f: parse_param(req, 'f') ? {}
+        sk: parse_param(req, 'sk') ? 0
+        l: parse_param(req, 'l') ? 100
+    }
+    list_doc req.params.type, find_param, (docs) ->
         renderJson res, docs ? {error: 'not found'}
 
 app.get '/', (req, res) ->
@@ -73,9 +88,5 @@ app.get '/', (req, res) ->
 
 
 app.use express.static "#__dirname/static"
-
-app.get '/favicon.ico', (req, res) ->
-    res.writeHead 404
-    res.end "Not found"
 
 app.listen port
